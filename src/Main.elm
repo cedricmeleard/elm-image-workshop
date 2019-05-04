@@ -20,10 +20,6 @@ type alias Model =
     }
 
 
-type alias User =
-    { name : String }
-
-
 type Msg
     = InputChanged String
     | FormSubmitted
@@ -53,7 +49,6 @@ view model =
         [ div [ class "section" ]
             [ h1 [ class "title" ] [ text "elm image search" ]
             , viewForm
-            , viewError model
             , viewResults model
             ]
         ]
@@ -87,8 +82,22 @@ viewForm =
         ]
 
 
+hasError : Model -> Bool
+hasError model =
+    not <| String.isEmpty model.error
+
+
 viewResults : Model -> Html Msg
 viewResults model =
+    if hasError model then
+        viewError model
+
+    else
+        viewList model
+
+
+viewList : Model -> Html Msg
+viewList model =
     div [ class "columns is-multiline" ] (List.map viewThumbnail <| filterImageFormat model.format model.images)
 
 
@@ -99,30 +108,16 @@ viewThumbnail image =
         ]
 
 
-hasError : Model -> Bool
-hasError model =
-    not <| String.isEmpty model.error
-
-
 viewError : Model -> Html Msg
 viewError model =
-    if hasError model then
-        article [ class "message is-danger" ]
-            [ div [ class "message-header" ]
-                [ p [] [ text "Oups..." ]
-                , button [ class "delete", onClick DeleteErrorMessage ] []
-                ]
-            , div [ class "message-body" ]
-                [ text model.error ]
+    article [ class "message is-danger" ]
+        [ div [ class "message-header" ]
+            [ p [] [ text "Oups..." ]
+            , button [ class "delete", onClick DeleteErrorMessage ] []
             ]
-
-    else
-        div [] []
-
-
-viewUsername : User -> Html Msg
-viewUsername user =
-    div [] [ text user.name ]
+        , div [ class "message-body" ]
+            [ text model.error ]
+        ]
 
 
 
